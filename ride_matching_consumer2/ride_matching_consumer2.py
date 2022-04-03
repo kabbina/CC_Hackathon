@@ -4,13 +4,15 @@ import time
 import os
 import json
 import requests
-#task = 0
-time.sleep(60)
-server_id=os.getenv('PORTADDR')
-consumer_id=os.getenv('CONSUMER_ID')
-url="http://producer:5000/newride"
-d = {'consumer_id' : consumer_id,'consumer_name':"Alex"}
-requests.post(url,json = d)
+import random
+
+time.sleep(20)    
+ipaddr=os.getenv('ip')
+idaddr=os.getenv('id')
+url="http://producer:5000/register_consumer"
+names={'consumer_id':idaddr,'server_id':ipaddr}
+requests.post(url,json=names)
+
 connection=pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
 channel=connection.channel()
 
@@ -21,16 +23,13 @@ queue=channel.queue_declare(queue='',durable=True)
 channel.queue_bind(exchange='direct_logs',queue=queue.method.queue,routing_key='ride_matching_consumer')
 
 def callback(ch,method,properties,body):
-    task = 1
-    server_id=os.getenv('PORTADDR')
-    consumer_id=os.getenv('CONSUMER_ID')
-    body = body.decode()
-    body = json.loads(body)
-    time_in_seconds = body['time']
-    time.sleep(time_in_seconds)
-    print('Finished sleeping for '+ str(time_in_seconds))
-    task = task + 1 
-    print('New Consumer id' + str(consumer_id) + 'task_id' + str(task))
+    datadirc=json.loads(body.decode("utf-8"))
+    #task_id=datadirc["taskId"]
+    #sleep_seconds = datadirc["time"]
+    print("Starting to sleep for seconds")
+    requests.post("http://producer:5000/new_ride_matching_consumer2",json={'driver':random.randint(0,1000),'user':datadirc['user']})
+    print(body)
+    print(id)
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 channel.basic_qos(prefetch_count=1)

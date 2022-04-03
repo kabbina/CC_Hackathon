@@ -23,8 +23,22 @@ services:
       - 5000:5000
     depends_on:
       - rabbitmq
-  
+    environment:
+      - PORTADDR=0.0.0.0:5000
+      - CONSUMER_ID=1
 
+  ride_matching_consumer2:
+    build: ride_matching_consumer2
+    volumes:
+      - ./ride_matching_consumer2:/app
+    ports:
+      - 7000:7000
+    depends_on:
+      - rabbitmq
+    environment:
+      - SERVERIP=1.2.3.4
+      - CONSUMERID=1428
+  
   database_consumer:
     build: database_consumer
     volumes:
